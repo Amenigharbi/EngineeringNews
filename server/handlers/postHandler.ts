@@ -1,18 +1,16 @@
 import { db } from "../datastore";
 import { RequestHandler } from "express-serve-static-core";
 import { Post } from "../types";
+import { CreatePostRequest, CreatePostResponse, ListPostRequest, ListPostResponse } from "../api";
 export type ExpressHandler<Req,Res>=RequestHandler<string,Partial<Res>,Partial<Req>,any>;
-export const listPostHandler:ExpressHandler<{},{}>=(request,response)=>{
-    response.send({posts:db.listPosts()});
-}
+export const listPostHandler:ExpressHandler<ListPostRequest,ListPostResponse>=(request,response)=>{
+    response.send({posts: db.listPosts()});
+};
 
-type CreatePostRequest=Pick<Post,'title'|'url'|'userId'>;
-interface CreatePostResponse{
-    post:Post;
-    
-}
 export const CreatePostHandler:ExpressHandler<CreatePostRequest,CreatePostResponse>=(req,res)=>{
-   
+   if(!req.body.title){
+    return res.status(400).send({ error: 'title missing' } as Partial<CreatePostResponse>);
+   }
     if(!req.body.title||!req.body.url ||!req.body.userId ){
        return res.sendStatus(400);
     }
